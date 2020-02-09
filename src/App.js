@@ -14,13 +14,16 @@ const PARAM_PAGE = 'page='
 const PARAM_HPP = 'hitsPerPage='
 
 class App extends Component {
+  _isMounted = false 
   constructor(props) {
     super(props)
+
     this.state = {
       results: null,
       searchTerm: DEFAULT_QUERY,
       searchKey: '',
-      error: null
+      error: null,
+      isLoading: false
     }
 
   }
@@ -63,7 +66,8 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-      }
+      },
+      isLoading: false
     })
 
     console.log(this.state)
@@ -86,13 +90,16 @@ class App extends Component {
   }
 
   fetchSearchTopStories = (searchTerm, page = 0) => {
+    this.setState({ isLoading: true})
+
     axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-      .then(result => this.setSearchTopStories(result.data))
-      .catch(error => this.setState({ error }))
+      .then(result => this._isMounted && this.setSearchTopStories(result.data))
+      .catch(error => this._isMounted && this.setState({ error }))
   }
 
 
   componentDidMount() {
+    this._isMounted = true
     const { searchTerm } = this.state
     this.setState({ searchKey: searchTerm })
     this.fetchSearchTopStories(searchTerm)
@@ -117,7 +124,7 @@ class App extends Component {
 
   render() {
 
-    const { searchTerm, results, searchKey, error } = this.state
+    const { searchTerm, results, searchKey, error ,isLoading } = this.state
 
     // the next variable will store the current data fetch page number 
     const page = (
@@ -157,10 +164,13 @@ class App extends Component {
         }
 
         <div className='interactions'>
-          <Button
+        { isLoading
+          ? <Loading />
+          : <Button
             onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
-          > More
-        </Button>
+            > More
+           </Button>
+        }
         </div>
       </div>
     )
@@ -209,30 +219,44 @@ const Table = ({ list, onDismiss }) => //{
   }
 //}
 
-const Search = ({ searchTerm, onSubmit, children, onChange }) => // {
- // return (
-
-  <form onSubmit={onSubmit}>
-    {children}
-    <input
-      type='text'
-      value={searchTerm}
-      onChange={onChange}
-    />
-    <button type='submit'>Submit</button>
-  </form>
- // )
-  Search.propTypes = {
-    searchTerm: PropTypes.string,
-    onSubmit: PropTypes.func.isRequired,
-    children: PropTypes.node,
-    onChange: PropTypes.func.isRequired
+class Search extends Component {
+  componentDidMount() {
+    if(this.input) {
+      this.input.focus()
+    }
   }
-//}
+  render() {
+    const {
+      searchTerm, 
+      onSubmit, 
+      children,
+      onChange 
+    } = this.props
 
+    return (
+      <form onSubmit={onSubmit}>
+        <input
+          type='text'
+          value={searchTerm}
+          onChange={onChange}
+          ref={el => this.input = el}
+        />
+        <button type='submit'> {children} </button>
+      </form>
+
+    //   Search.propTypes = {
+    //   searchTerm: PropTypes.string,
+    //   onSubmit: PropTypes.func.isRequired,
+    //   children: PropTypes.node,
+    //   onChange: PropTypes.func.isRequired
+    // }
+    )
+  }
+}
+
+ 
 const Button = ({ onClick, children, className }) => 
-//{
- // return (
+
     <div>
       <button
         onClick={onClick}
@@ -243,7 +267,6 @@ const Button = ({ onClick, children, className }) =>
       </button>
     </div>
 
- // )
   Button.defaultProps = {
     className: ''
   }
@@ -252,7 +275,11 @@ const Button = ({ onClick, children, className }) =>
     children: PropTypes.node,
     className: PropTypes.string.isRequired
   }
-//}
+
+const Loading = () => 
+  <div> 
+  <i className="fas fa-spinner"></i>
+   </div>
 
 export default App
 
