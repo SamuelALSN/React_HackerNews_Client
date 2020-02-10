@@ -151,7 +151,7 @@ class App extends Component {
             Search
           </Search>
         </div>
-        {
+        {/* {
           error ?
             <div className="interactions">
               <p>Error to fetch Data </p>
@@ -161,24 +161,38 @@ class App extends Component {
               list={list}
               onDismiss={this.onDismiss}
             />
-        }
+        } */}
+       
+        {/* using of HOC in the line below to replace the conditionnal  rendering  */}
+        <TableWithError 
+         error={error}
+         list={list}
+         onDismiss={this.onDismiss}
+         />
 
         <div className='interactions'>
-        { isLoading
+        {/* { isLoading
           ? <Loading />
           : <Button
             onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
             > More
            </Button>
-        }
+        } */}
+        {/*  Using of HOC for conditions rendering  */}
+          <ButtonWithLoading
+            isLoading={isLoading}
+            onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
+           >
+            More
+          </ButtonWithLoading>
         </div>
       </div>
     )
   }
 }
 
-const Table = ({ list, onDismiss }) => //{
- // return (
+const Table = ({ list, onDismiss }) => 
+
     <div className='table'>
       {list.map(item =>
         <div key={item.objectID} className='table-row'>
@@ -204,7 +218,7 @@ const Table = ({ list, onDismiss }) => //{
         </div>
       )}
     </div>
- // )
+
   Table.propTypes = {
     list: PropTypes.arrayOf(
       PropTypes.shape({
@@ -217,7 +231,17 @@ const Table = ({ list, onDismiss }) => //{
     ).isRequired,
     onDismiss: PropTypes.func.isRequired
   }
-//}
+
+  // definition of HOC for conditionnal rendering 
+
+const withError = (Component) => (props) =>
+   props.error
+   ?  <diV className="interactions"> 
+      <p>Error to fetch Data </p>
+      </diV> 
+   : <Table { ...props } />
+  const TableWithError = withError(Table)
+  
 
 class Search extends Component {
   componentDidMount() {
@@ -278,8 +302,17 @@ const Button = ({ onClick, children, className }) =>
 
 const Loading = () => 
   <div> 
-  <i className="fas fa-spinner"></i>
-   </div>
+  <p> Loading ...</p>
+  </div>
+
+// definition of the HOC
+const withLoading = (Component) => ({ isLoading, ...rest }) =>
+    isLoading
+    ? <Loading/>
+    : <Component { ...rest } />
+
+const ButtonWithLoading = withLoading(Button)  
+
 
 export default App
 
