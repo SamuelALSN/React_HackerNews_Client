@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
-
+import { sortBy } from 'lodash'
 require('./App.css')
 
 const DEFAULT_QUERY = 'redux'
@@ -13,8 +13,16 @@ const PARAM_SEARCH = 'query='
 const PARAM_PAGE = 'page='
 const PARAM_HPP = 'hitsPerPage='
 
+const SORTS = {
+  NONE: list => list,
+  TITLE: list => sortBy(list, 'title'),
+  AUTHOR: list => sortBy(list, 'title'),
+  COMMENTS: list => sortBy(list, 'num_comments').reverse(),
+  POINTS: list => sortBy(list, 'points').reverse(),
+}
+
 class App extends Component {
-  _isMounted = false 
+  _isMounted = false
   constructor(props) {
     super(props)
 
@@ -23,13 +31,18 @@ class App extends Component {
       searchTerm: DEFAULT_QUERY,
       searchKey: '',
       error: null,
-      isLoading: false
+      isLoading: false,
+      sortKey: 'NONE'
     }
 
+    this.onSort = this.onSort.bind(this)
+  }
+
+  onSort(sortKey) {
+    this.setState({ sortKey })
   }
 
   needsToSearchTopStories = searchTerm => !this.state.results[searchTerm]
-
 
 
   onSearchChange = event => {
@@ -90,7 +103,7 @@ class App extends Component {
   }
 
   fetchSearchTopStories = (searchTerm, page = 0) => {
-    this.setState({ isLoading: true})
+    this.setState({ isLoading: true })
 
     axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(result => this._isMounted && this.setSearchTopStories(result.data))
@@ -124,7 +137,14 @@ class App extends Component {
 
   render() {
 
-    const { searchTerm, results, searchKey, error ,isLoading } = this.state
+    const {
+      searchTerm,
+      results,
+      searchKey,
+      error,
+      isLoading,
+      sortKey
+    } = this.state
 
     // the next variable will store the current data fetch page number 
     const page = (
@@ -162,27 +182,29 @@ class App extends Component {
               onDismiss={this.onDismiss}
             />
         } */}
-       
+
         {/* using of HOC in the line below to replace the conditionnal  rendering  */}
-        <TableWithError 
-         error={error}
-         list={list}
-         onDismiss={this.onDismiss}
-         />
+        <TableWithError
+          sortKey={sortKey}
+          onSort={this.onSort}
+          error={error}
+          list={list}
+          onDismiss={this.onDismiss}
+        />
 
         <div className='interactions'>
-        {/* { isLoading
+          {/* { isLoading
           ? <Loading />
           : <Button
             onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
             > More
            </Button>
         } */}
-        {/*  Using of HOC for conditions rendering  */}
+          {/*  Using of HOC for conditions rendering  */}
           <ButtonWithLoading
             isLoading={isLoading}
             onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
-           >
+          >
             More
           </ButtonWithLoading>
         </div>
@@ -191,70 +213,118 @@ class App extends Component {
   }
 }
 
-const Table = ({ list, onDismiss }) => 
+const Table = ({ list, onDismiss, onSort, sortKey }) =>
 
-    <div className='table'>
-      {list.map(item =>
-        <div key={item.objectID} className='table-row'>
-          <span style={{ width: '40%' }}>
-            <a href={item.url}>{item.title}</a>
-          </span>
-          <span style={{ width: '30%' }}>
-            {item.author}
-          </span>
-          <span style={{ width: '10%' }}>
-            {item.num_comments}
-          </span>
-          <span style={{ width: '10%' }}>
-            {item.points}
-          </span>
-          <span>
-            <Button
-              onClick={() => onDismiss(item.objectID)}
-            >
-              Dismiss
-          </Button>
-          </span>
-        </div>
-      )}
+  <div className='table'>
+    <div className="table-header">
+      <span style={{ width: '40%' }}>
+        <Sort
+          sortKey={'TITLE'}
+          onSort={onSort}
+        >
+          Title
+        </Sort>
+      </span>
+      <span style={{ width: '30%' }}>
+        <Sort
+          sortKey={'AUTHOR'}
+          onSort={onSort}
+        >
+          Author
+        </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort
+          sortKey={'COMMENTS'}
+          onSort={onSort}
+        >
+          Comments
+        </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort
+          sortKey={'POINTS'}
+          onSort={onSort}
+        >
+          Points
+        </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        Archive
+      </span>
     </div>
+    {SORTS[sortKey](list).map(item =>
+      <div key={item.objectID} className='table-row'>
+        <span style={{ width: '40%' }}>
+          <a href={item.url}>{item.title}</a>
+        </span>
+        <span style={{ width: '30%' }}>
+          {item.author}
+        </span>
+        <span style={{ width: '10%' }}>
+          {item.num_comments}
+        </span>
+        <span style={{ width: '10%' }}>
+          {item.points}
+        </span>
+        <span>
+          <Button
+            onClick={() => onDismiss(item.objectID)}
+          >
+            Dismiss
+          </Button>
+        </span>
+      </div>
+    )}
+  </div>
 
-  Table.propTypes = {
-    list: PropTypes.arrayOf(
-      PropTypes.shape({
-        objectID: PropTypes.string.isRequired,
-        author: PropTypes.string,
-        url: PropTypes.string,
-        num_comments: PropTypes.number,
-        points: PropTypes.number,
-      })
-    ).isRequired,
-    onDismiss: PropTypes.func.isRequired
-  }
+Table.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      objectID: PropTypes.string.isRequired,
+      author: PropTypes.string,
+      url: PropTypes.string,
+      num_comments: PropTypes.number,
+      points: PropTypes.number,
+    })
+  ).isRequired,
+  onDismiss: PropTypes.func.isRequired
+}
 
-  // definition of HOC for conditionnal rendering 
+// creation of Sort Components
+
+const Sort = ({ sortKey, onSort, children }) => 
+ <Button 
+    onClick = {() => onSort(sortKey)}
+    className='button-inline'
+  >
+   {children}
+ </Button>
+
+
+// definition of HOC for conditionnal rendering 
 
 const withError = (Component) => (props) =>
-   props.error
-   ?  <diV className="interactions"> 
+  props.error
+    ? <diV className="interactions">
       <p>Error to fetch Data </p>
-      </diV> 
-   : <Table { ...props } />
-  const TableWithError = withError(Table)
-  
+    </diV>
+    : <Table {...props} />
+const TableWithError = withError(Table)
+
 
 class Search extends Component {
   componentDidMount() {
-    if(this.input) {
+    if (this.input) {
       this.input.focus()
     }
   }
   render() {
     const {
-      searchTerm, 
-      onSubmit, 
+      searchTerm,
+      onSubmit,
       children,
-      onChange 
+      onChange
     } = this.props
 
     return (
@@ -268,50 +338,50 @@ class Search extends Component {
         <button type='submit'> {children} </button>
       </form>
 
-    //   Search.propTypes = {
-    //   searchTerm: PropTypes.string,
-    //   onSubmit: PropTypes.func.isRequired,
-    //   children: PropTypes.node,
-    //   onChange: PropTypes.func.isRequired
-    // }
+      //   Search.propTypes = {
+      //   searchTerm: PropTypes.string,
+      //   onSubmit: PropTypes.func.isRequired,
+      //   children: PropTypes.node,
+      //   onChange: PropTypes.func.isRequired
+      // }
     )
   }
 }
 
- 
-const Button = ({ onClick, children, className }) => 
 
-    <div>
-      <button
-        onClick={onClick}
-        className={className}
-        type='submit'
-      >
-        {children}
-      </button>
-    </div>
+const Button = ({ onClick, children, className }) =>
 
-  Button.defaultProps = {
-    className: ''
-  }
-  Button.propTypes = {
-    onClick: PropTypes.func.isRequired,
-    children: PropTypes.node,
-    className: PropTypes.string.isRequired
-  }
+  <div>
+    <button
+      onClick={onClick}
+      className={className}
+      type='submit'
+    >
+      {children}
+    </button>
+  </div>
 
-const Loading = () => 
-  <div> 
-  <p> Loading ...</p>
+Button.defaultProps = {
+  className: ''
+}
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  children: PropTypes.node,
+  className: PropTypes.string.isRequired
+}
+
+const Loading = () =>
+  <div>
+    <p> Loading ...</p>
   </div>
 
 // definition of the HOC
 const withLoading = (Component) => ({ isLoading, ...rest }) =>
-    isLoading
-    ? <Loading/>
-    : <Component { ...rest } />
+  isLoading
+    ? <Loading />
+    : <Component {...rest} />
 
-const ButtonWithLoading = withLoading(Button)  
+const ButtonWithLoading = withLoading(Button)
 
 
 export default App
