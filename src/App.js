@@ -32,14 +32,27 @@ class App extends Component {
       searchKey: '',
       error: null,
       isLoading: false,
-      sortKey: 'NONE'
+      sortKey: 'NONE',
+      isSortReverse: false
     }
 
     this.onSort = this.onSort.bind(this)
   }
 
   onSort(sortKey) {
-    this.setState({ sortKey })
+    /*  this method will verify if the list is reverse sorted 
+     explaining :
+     It is reverse  if the sortKey in the state 
+     are the same with the incoming sortKey when we click on a specific Sort Component 
+     and isSortReverse is set to true 
+    
+     the const isSortReverse value will be true or false 
+     depending on the result of the condition
+
+     */
+
+    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse
+    this.setState({ sortKey, isSortReverse })
   }
 
   needsToSearchTopStories = searchTerm => !this.state.results[searchTerm]
@@ -136,14 +149,14 @@ class App extends Component {
 
 
   render() {
-
     const {
       searchTerm,
       results,
       searchKey,
       error,
       isLoading,
-      sortKey
+      sortKey,
+      isSortReverse
     } = this.state
 
     // the next variable will store the current data fetch page number 
@@ -187,6 +200,7 @@ class App extends Component {
         <TableWithError
           sortKey={sortKey}
           onSort={this.onSort}
+          isSortReverse={isSortReverse}
           error={error}
           list={list}
           onDismiss={this.onDismiss}
@@ -213,94 +227,133 @@ class App extends Component {
   }
 }
 
-const Table = ({ list, onDismiss, onSort, sortKey }) =>
+const Table = ({
+  list,
+  onDismiss,
+  onSort,
+  sortKey,
+  isSortReverse
+}) => {
 
-  <div className='table'>
-    <div className="table-header">
-      <span style={{ width: '40%' }}>
-        <Sort
-          sortKey={'TITLE'}
-          onSort={onSort}
-        >
-          Title
-        </Sort>
-      </span>
-      <span style={{ width: '30%' }}>
-        <Sort
-          sortKey={'AUTHOR'}
-          onSort={onSort}
-        >
-          Author
-        </Sort>
-      </span>
-      <span style={{ width: '10%' }}>
-        <Sort
-          sortKey={'COMMENTS'}
-          onSort={onSort}
-        >
-          Comments
-        </Sort>
-      </span>
-      <span style={{ width: '10%' }}>
-        <Sort
-          sortKey={'POINTS'}
-          onSort={onSort}
-        >
-          Points
-        </Sort>
-      </span>
-      <span style={{ width: '10%' }}>
-        Archive
-      </span>
-    </div>
-    {SORTS[sortKey](list).map(item =>
-      <div key={item.objectID} className='table-row'>
+  const sortedList = SORTS[sortKey](list)
+  // if isSortReverse still false 
+  // this means the list is not already reverse
+  // so we must rerverse the sortedlist
+  const reverseSortedList = isSortReverse
+    ? sortedList.reverse()
+    : sortedList
+
+  return (
+    <div className='table'>
+      <div className="table-header">
         <span style={{ width: '40%' }}>
-          <a href={item.url}>{item.title}</a>
+          <Sort
+            sortKey={'TITLE'}
+            onSort={onSort}
+            // the props below wich will be set in our each Sort Component 
+            // is set to give user visual feedback to distinguish wich column is actively sorted 
+            // we pass the sortKey from internal component state as active sort Key 
+            // to our Sort Component 
+            // now the uset will know weither sort is active based on (en fonction de) the sortKey and the activeSortKey
+            activeSortKey={sortKey}
+          >
+            Title
+        </Sort>
         </span>
         <span style={{ width: '30%' }}>
-          {item.author}
-        </span>
-        <span style={{ width: '10%' }}>
-          {item.num_comments}
-        </span>
-        <span style={{ width: '10%' }}>
-          {item.points}
-        </span>
-        <span>
-          <Button
-            onClick={() => onDismiss(item.objectID)}
+          <Sort
+            sortKey={'AUTHOR'}
+            onSort={onSort}
+            activeSortKey={sortKey}
           >
-            Dismiss
-          </Button>
+            Author
+        </Sort>
         </span>
+        <span style={{ width: '10%' }}>
+          <Sort
+            sortKey={'COMMENTS'}
+            onSort={onSort}
+            activeSortKey={sortKey}
+          >
+            Comments
+        </Sort>
+        </span>
+        <span style={{ width: '10%' }}>
+          <Sort
+            sortKey={'POINTS'}
+            onSort={onSort}
+            activeSortKey={sortKey}
+          >
+            Points
+        </Sort>
+        </span>
+        <span style={{ width: '10%' }}>
+          Archive
+      </span>
       </div>
-    )}
-  </div>
+      {reverseSortedList.map(item =>
+        <div key={item.objectID} className='table-row'>
+          <span style={{ width: '40%' }}>
+            <a href={item.url}>{item.title}</a>
+          </span>
+          <span style={{ width: '30%' }}>
+            {item.author}
+          </span>
+          <span style={{ width: '10%' }}>
+            {item.num_comments}
+          </span>
+          <span style={{ width: '10%' }}>
+            {item.points}
+          </span>
+          <span>
+            <Button
+              onClick={() => onDismiss(item.objectID)}
+            >
+              Dismiss
+          </Button>
+          </span>
+        </div>
+      )}
+    </div>
+  )
 
-Table.propTypes = {
-  list: PropTypes.arrayOf(
-    PropTypes.shape({
-      objectID: PropTypes.string.isRequired,
-      author: PropTypes.string,
-      url: PropTypes.string,
-      num_comments: PropTypes.number,
-      points: PropTypes.number,
-    })
-  ).isRequired,
-  onDismiss: PropTypes.func.isRequired
+  // Table.propTypes = {
+  //   list: PropTypes.arrayOf(
+  //     PropTypes.shape({
+  //       objectID: PropTypes.string.isRequired,
+  //       author: PropTypes.string,
+  //       url: PropTypes.string,
+  //       num_comments: PropTypes.number,
+  //       points: PropTypes.number,
+  //     })
+  //   ).isRequired,
+  //   onDismiss: PropTypes.func.isRequired
+  // }
+
 }
 
-// creation of Sort Components
+// definition  of Sort Components
 
-const Sort = ({ sortKey, onSort, children }) => 
- <Button 
-    onClick = {() => onSort(sortKey)}
-    className='button-inline'
+const Sort = ({
+  sortKey,
+  activeSortKey,
+  onSort,
+  children
+}) => {
+  const sortClass = ['button-inline']
+
+  if (sortKey === activeSortKey) {
+    sortClass.push('button-active')
+  }
+  return (
+  <Button
+    onClick={() => onSort(sortKey)}
+    className={sortClass.join(' ')}
   >
-   {children}
- </Button>
-
+    {children}
+  </Button>
+  )
+}
 
 // definition of HOC for conditionnal rendering 
 
