@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
 import { sortBy } from 'lodash'
-require('./App.css')
+import classNames from 'classnames'
+import './App.css'
 
 const DEFAULT_QUERY = 'redux'
 const DEFAULT_HPP = '100'
@@ -333,22 +334,27 @@ const Table = ({
 }
 
 // definition  of Sort Components
-
 const Sort = ({
   sortKey,
   activeSortKey,
   onSort,
   children
 }) => {
-  const sortClass = ['button-inline']
-
-  if (sortKey === activeSortKey) {
-    sortClass.push('button-active')
-  }
+  // giviing our Sort Component an extra classnames attribute
+  // in case it is sorted to give visual feedback 
+  const sortClass = classNames (
+    'button-inline',
+    { 'button-active' : sortKey === activeSortKey }
+  ) 
+   
+  //  old way ==>
+  //if (sortKey === activeSortKey) {
+  //   sortClass.push('button-active')
+  // }
   return (
   <Button
     onClick={() => onSort(sortKey)}
-    className={sortClass.join(' ')}
+    className={sortClass}
   >
     {children}
   </Button>
