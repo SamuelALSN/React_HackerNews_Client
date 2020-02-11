@@ -162,7 +162,7 @@ class App extends Component {
             Search
           </Search>
         </div>
-        {
+        {/* {
           error ?
             <div className="interactions">
               <p>Unable to  Data </p>
@@ -172,17 +172,17 @@ class App extends Component {
               list={list}
               onDismiss={this.onDismiss}
             />
-        }
+        } */}
 
         {/* using of HOC in the line below to replace the conditionnal  rendering  */}
-        {/* <TableWithError
+        <TableWithError
           // sortKey={sortKey}
           // onSort={this.onSort}
           // isSortReverse={isSortReverse}
           error={error}
           list={list}
           onDismiss={this.onDismiss}
-        /> */}
+        />
         <div className='interactions'>
           {/*  Using of HOC for conditions rendering  */}
           <ButtonWithLoading
