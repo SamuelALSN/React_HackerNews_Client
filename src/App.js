@@ -22,7 +22,39 @@ const SORTS = {
   POINTS: list => sortBy(list, 'points').reverse(),
 }
 
+const updateSearchTopStoriesState = (hits, page) => (prevState) => {
+  const { searchKey, results } = prevState
+  // console.log(results) // print the state before any operations
+
+
+  // these constant is define for the pagination | to avoid new paginated data to overwrite old fetch data when we click on the more button
+  const oldHits = results && results[searchKey]
+    ? results[searchKey].hits
+    : []
+  // OLD WAYS
+  //  const oldHits = page !==0 
+  //                 ? this.state.results.hits
+  //                 : []
+
+  // console.log(oldHits) // to see how our results look like
+
+
+  const updatedHits = [
+    ...oldHits,
+    ...hits
+  ]
+  // returning our previous state 
+  return {
+    results: {
+      ...results,
+      [searchKey]: { hits: updatedHits, page }
+    },
+    isLoading: false
+  }
+}
+
 class App extends Component {
+
   _isMounted = false
   constructor(props) {
     super(props)
@@ -45,44 +77,9 @@ class App extends Component {
 
 
   setSearchTopStories = result => {
-    // console.log(results)
     const { hits, page } = result // recently fetch result from API
-
-    // implementation of the cache with setstate 
-    // here we copy our previous state and merge it with recently value added to the state 
-
-    this.setState( prevState => {
-      const { searchKey, results } =prevState
-      // console.log(results) // print the state before any operations
-   
-   
-       // these constant is define for the pagination | to avoid new paginated data to overwrite old fetch data when we click on the more button
-       const oldHits = results && results[searchKey]
-         ? results[searchKey].hits
-         : []
-          // OLD WAYS
-          //  const oldHits = page !==0 
-         //                 ? this.state.results.hits
-        //                 : []
-
-      // console.log(oldHits) // to see how our results look like
-   
-   
-       const updatedHits = [
-         ...oldHits,
-         ...hits
-       ]
-        // returning our previous state 
-      return {
-        results: {
-          ...results,
-          [searchKey]: { hits: updatedHits, page }
-        },
-        isLoading: false
-      }
-    })
-    console.log(this.state)
-
+    this.setState(updateSearchTopStoriesState(hits, page ))
+    //console.log(this.state)
   }
 
 
