@@ -68,7 +68,8 @@ class App extends Component {
       ...hits
     ]
 
-    // implementation of the cache with setstates
+    // implementation of the cache with setstate 
+    // here we copy our previous state and merge it with recently value added to the state 
     this.setState({
       results: {
         ...results,
@@ -263,7 +264,7 @@ class Table extends Component {
               activeSortKey={sortKey}
             >
               Title
-                        </Sort>
+            </Sort>
           </span>
           <span style={{ width: '30%' }}>
             <Sort
