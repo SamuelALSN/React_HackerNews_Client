@@ -5,6 +5,10 @@ import renderer from 'react-test-renderer'
 import Enzyme, { shallow } from 'enzyme'
 import Adapter from 'enzyme-adapter-react-16'
 import App, { Search, Button, Table } from './App'
+import UpdateSearchTopStoriesState from './functions/updateSearchTopStoriesState'
+import { func } from 'prop-types'
+import updateSearchTopStoriesState from './functions/updateSearchTopStoriesState'
+
 Enzyme.configure({ adapter: new Adapter() })
 
 // test('renders learn react link', () => {
@@ -40,7 +44,7 @@ describe('Search', () => {
   /* The first test simply renders the Search component
     to the DOM and verifies that there is no error during
    the rendering process */
-  it('renders seach without crashing', () => {
+  it('renders Search without crashing', () => {
     const div = document.createElement('div')
     ReactDOM.render(<Search>Search</Search>, div)
     ReactDOM.unmountComponentAtNode(div)
@@ -55,11 +59,20 @@ describe('Search', () => {
 })
 
 describe('Button', () => {
+  
+
   it('renders Button without crashing', () => {
     const div = document.createElement('div')
-    ReactDOM.render(<Button>Give Me More</Button>, div)
+    ReactDOM.render(<Button> More</Button>, div)
     ReactDOM.unmountComponentAtNode(div)
   })
+
+  it('render button with defined onClick ' ,() => {
+    const onClick = jest.fn()
+    const wrapper = shallow(<Button onClick={onClick}/>)
+    expect(wrapper.prop(onClick)).to.equal(onClick)
+  })
+
   test('has a valid snapshot', () => {
     const component = renderer.create(<Button>Give Me More</Button>)
     const tree = component.toJSON()
@@ -96,5 +109,11 @@ describe('Table', () => {
     const component = renderer.create(<Table {...props} />)
     const tree = component.toJSON()
     expect(tree).toMatchSnapshot()
+  })
+})
+
+describe('test on UpdateSearchTopStories', () => {
+  it('receive hits and page in signature ',() =>{
+   expect(updateSearchTopStoriesState(hits,page)).toBeTruthy()
   })
 })

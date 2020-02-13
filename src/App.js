@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { sortBy } from 'lodash'
 import classNames from 'classnames'
 import './App.css'
+import updateSearchTopStoriesState from './functions/updateSearchTopStoriesState'
 
 const DEFAULT_QUERY = 'redux'
 const DEFAULT_HPP = '100'
@@ -22,36 +23,7 @@ const SORTS = {
   POINTS: list => sortBy(list, 'points').reverse(),
 }
 
-const updateSearchTopStoriesState = (hits, page) => (prevState) => {
-  const { searchKey, results } = prevState
-  // console.log(results) // print the state before any operations
 
-
-  // these constant is define for the pagination | to avoid new paginated data to overwrite old fetch data when we click on the more button
-  const oldHits = results && results[searchKey]
-    ? results[searchKey].hits
-    : []
-  // OLD WAYS
-  //  const oldHits = page !==0 
-  //                 ? this.state.results.hits
-  //                 : []
-
-  // console.log(oldHits) // to see how our results look like
-
-
-  const updatedHits = [
-    ...oldHits,
-    ...hits
-  ]
-  // returning our previous state 
-  return {
-    results: {
-      ...results,
-      [searchKey]: { hits: updatedHits, page }
-    },
-    isLoading: false
-  }
-}
 
 class App extends Component {
 
@@ -118,7 +90,7 @@ class App extends Component {
     const isNotId = item => item.objectID !== id // this functions return item which objectID  is different from the given id
     const updatedHits = hits.filter(isNotId)  // we are removing this object from the results lists with filter
 
-    // we caches the result by recovering results present in state already andd merge with the new seachTerm results ,identified with searchKey
+    // we caches the result by recovering results present in state already and merge with the new seachTerm results ,identified with searchKey
     this.setState({
       results: {
         ...results,

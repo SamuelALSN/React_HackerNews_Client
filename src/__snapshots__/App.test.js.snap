@@ -10,7 +10,6 @@ exports[`App has a valid snapshot 1`] = `
     <form
       onSubmit={[Function]}
     >
-      Search
       <input
         onChange={[Function]}
         type="text"
@@ -18,24 +17,104 @@ exports[`App has a valid snapshot 1`] = `
       <button
         type="submit"
       >
-        Submit
+         
+        Search
+         
       </button>
     </form>
   </div>
   <div
     className="table"
-  />
+  >
+    <div
+      className="table-header"
+    >
+      <span
+        style={
+          Object {
+            "width": "40%",
+          }
+        }
+      >
+        <div>
+          <button
+            className="button-inline"
+            onClick={[Function]}
+            type="submit"
+          >
+            Title
+          </button>
+        </div>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "30%",
+          }
+        }
+      >
+        <div>
+          <button
+            className="button-inline"
+            onClick={[Function]}
+            type="submit"
+          >
+            Author
+          </button>
+        </div>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        <div>
+          <button
+            className="button-inline"
+            onClick={[Function]}
+            type="submit"
+          >
+            Comments
+          </button>
+        </div>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        <div>
+          <button
+            className="button-inline"
+            onClick={[Function]}
+            type="submit"
+          >
+            Points
+          </button>
+        </div>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        Archive
+      </span>
+    </div>
+  </div>
   <div
     className="interactions"
   >
     <div>
-      <button
-        className=""
-        onClick={[Function]}
-        type="submit"
-      >
-         More
-      </button>
+      <p>
+         Loading ...
+      </p>
     </div>
   </div>
 </div>
@@ -54,14 +133,15 @@ exports[`Button has a valid snapshot 1`] = `
 
 exports[`Search has a valid snapshot 1`] = `
 <form>
-  Search
   <input
     type="text"
   />
   <button
     type="submit"
   >
-    Submit
+     
+    Search
+     
   </button>
 </form>
 `;
@@ -70,6 +150,87 @@ exports[`Table has a valid snapshot 1`] = `
 <div
   className="table"
 >
+  <div
+    className="table-header"
+  >
+    <span
+      style={
+        Object {
+          "width": "40%",
+        }
+      }
+    >
+      <div>
+        <button
+          className="button-inline"
+          onClick={[Function]}
+          type="submit"
+        >
+          Title
+        </button>
+      </div>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div>
+        <button
+          className="button-inline"
+          onClick={[Function]}
+          type="submit"
+        >
+          Author
+        </button>
+      </div>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      <div>
+        <button
+          className="button-inline"
+          onClick={[Function]}
+          type="submit"
+        >
+          Comments
+        </button>
+      </div>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      <div>
+        <button
+          className="button-inline"
+          onClick={[Function]}
+          type="submit"
+        >
+          Points
+        </button>
+      </div>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      Archive
+    </span>
+  </div>
   <div
     className="table-row"
   >
